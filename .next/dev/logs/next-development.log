@@ -1,2 +1,5 @@
-{"timestamp":"00:00:02.523","source":"Server","level":"LOG","message":""}
-{"timestamp":"00:00:12.727","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:00:03.326","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:03.370","source":"Browser","level":"WARN","message":"GoTrueClient@sb-xqdhdgbyrkasgsjjbygz-auth-token:1 (2.112.2) 2026-08-07T20:37:32.063Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key."}
+{"timestamp":"00:00:04.110","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mGoTrueClient@sb-xqdhdgbyrkasgsjjbygz-auth-token:1 (2.112.2) 2026-08-07T20:37:32.063Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.\\u001b[39m\" \"\\u001b[2m(lib/supabase.js:6:37)\\u001b[22m\""}
+{"timestamp":"00:00:05.398","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:02:37.558","source":"Server","level":"LOG","message":"✓ Compiled in 419ms"}

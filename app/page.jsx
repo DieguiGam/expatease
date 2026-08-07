@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-
+import { supabase } from "../lib/supabase";
 const WHATSAPP_NUMBER = "593996021267";
 const SERVICE_OPTIONS = [
   "Home Services",
@@ -88,7 +88,7 @@ export default function Home() {
     document.getElementById("request")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const selected = String(form.get("date") || "");
@@ -99,6 +99,30 @@ export default function Home() {
     localStorage.setItem("expatease-reference", String(sequence));
     const reference = `EX-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`;
     const submitted = new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "short" }).format(new Date());
+    const { error } = await supabase
+  .from("requests")
+  .insert([
+    {
+      reference: reference,
+      full_name: String(form.get("name") || ""),
+      whatsapp: String(form.get("phone") || ""),
+      email: String(form.get("email") || ""),
+      location: String(form.get("location") || ""),
+      service: String(form.get("service") || ""),
+      preferred_date: selected,
+      preferred_time: String(form.get("time") || ""),
+      details: String(form.get("details") || ""),
+      status: "pending",
+      price: null,
+      internal_notes: null,
+    },
+  ]);
+
+if (error) {
+  console.error("Supabase error:", error);
+  setStatus("We couldn't save your request. Please try again.");
+  return;
+}
     const message = [
       "------------------------------",
       "*NEW SERVICE REQUEST*",
