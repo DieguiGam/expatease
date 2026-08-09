@@ -76,12 +76,124 @@ export default function Home() {
   const [date, setDate] = useState("");
   const [status, setStatus] = useState("");
   const [year, setYear] = useState(2026);
+  const [occupiedTimes, setOccupiedTimes] = useState([]);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
   useEffect(() => setYear(new Date().getFullYear()), []);
+  useEffect(() => {
+  async function loadAvailability() {
+    if (!date) {
+      setOccupiedTimes([]);
+      return;
+    }
+
+    setLoadingAvailability(true);
+
+    const { data, error } = await supabase.rpc(
+      "get_booked_times",
+      {
+        requested_date: date,
+      }
+    );
+
+    if (error) {
+      console.error(
+        "Error loading availability:",
+        error
+      );
+
+      setOccupiedTimes([]);
+      setLoadingAvailability(false);
+      return;
+    }
+
+    const blockedTimes = [];
+
+    (data || []).forEach((booking) => {
+      const start = timeToMinutes(
+        booking.preferred_time
+      );
+
+      const duration = Number(
+        booking.estimated_duration || 60
+      );
+
+      const buffer = Number(
+        booking.buffer_time || 30
+      );
+
+      const end = start + duration + buffer;
+
+      for (
+        let minute = start;
+        minute < end;
+        minute += 30
+      ) {
+        blockedTimes.push(
+          minutesToTime(minute)
+        );
+      }
+    });
+
+    setOccupiedTimes([
+      ...new Set(blockedTimes),
+    ]);
+
+    setLoadingAvailability(false);
+  }
+
+  loadAvailability();
+}, [date]);
 
   const selectedDay = date ? new Date(`${date}T12:00:00`).getDay() : null;
-  const times = selectedDay === 6
-    ? ["Morning (8:00 AM–12:00 PM)", "Afternoon (12:00 PM–5:00 PM)", "Evening (5:00 PM–8:00 PM)"]
-    : ["Morning (8:00 AM–12:00 PM)", "Afternoon (12:00 PM–5:00 PM)"];
+const times = selectedDay === 6
+  ? [
+      "8:00 AM",
+      "8:30 AM",
+      "9:00 AM",
+      "9:30 AM",
+      "10:00 AM",
+      "10:30 AM",
+      "11:00 AM",
+      "11:30 AM",
+      "12:00 PM",
+      "12:30 PM",
+      "1:00 PM",
+      "1:30 PM",
+      "2:00 PM",
+      "2:30 PM",
+      "3:00 PM",
+      "3:30 PM",
+      "4:00 PM",
+      "4:30 PM",
+      "5:00 PM",
+      "5:30 PM",
+      "6:00 PM",
+      "6:30 PM",
+      "7:00 PM",
+      "7:30 PM",
+      "8:00 PM",
+    ]
+  : [
+      "8:00 AM",
+      "8:30 AM",
+      "9:00 AM",
+      "9:30 AM",
+      "10:00 AM",
+      "10:30 AM",
+      "11:00 AM",
+      "11:30 AM",
+      "12:00 PM",
+      "12:30 PM",
+      "1:00 PM",
+      "1:30 PM",
+      "2:00 PM",
+      "2:30 PM",
+      "3:00 PM",
+      "3:30 PM",
+      "4:00 PM",
+      "4:30 PM",
+      "5:00 PM",
+    ];
 
   const chooseService = (title) => {
     setSelectedService(title);
@@ -194,7 +306,30 @@ if (error) {
               <label><span>Location</span><input name="location" required placeholder="Cuenca, El Centro" /></label>
               <label><span>Service</span><select name="service" required value={selectedService} onChange={e => setSelectedService(e.target.value)}><option value="">Choose a service</option>{SERVICE_OPTIONS.map(option => <option key={option}>{option}</option>)}</select></label>
               <div className="dateField"><span>Preferred date</span><input type="hidden" name="date" value={date} /><div className="dateDisplay">{date ? humanDate(date) : "Select a date below"}</div><Calendar value={date} onChange={setDate} /></div>
-              <label><span>Preferred time</span><select name="time" required disabled={!date}><option value="">{date ? "Choose a time" : "Select a date first"}</option>{date && times.map(time => <option key={time}>{time}</option>)}</select><small>{selectedDay === 6 ? "Saturday hours: 8:00 AM–8:00 PM" : "Monday–Friday hours: 8:00 AM–5:00 PM"}</small></label>
+              <label><span>Preferred time</span><select
+  name="time"
+  required
+  disabled={!date || loadingAvailability}
+><option value="">
+  {!date
+    ? "Select a date first"
+    : loadingAvailability
+    ? "Checking availability..."
+    : "Choose a time"}
+</option>{date &&
+  times.map((time) => {
+    const isOccupied = occupiedTimes.includes(time);
+
+    return (
+      <option
+        key={time}
+        value={time}
+        disabled={isOccupied}
+      >
+        {isOccupied ? `${time} — Unavailable` : time}
+      </option>
+    );
+  })}</select><small>{selectedDay === 6 ? "Saturday hours: 8:00 AM–8:00 PM" : "Monday–Friday hours: 8:00 AM–5:00 PM"}</small></label>
               <label className="full"><span>Describe what you need</span><textarea name="details" rows={5} required placeholder="Please describe the situation, what you need, and any important details..." /></label>
               <label className="checkbox full"><input name="consent" type="checkbox" required /><span>I authorize ExpatEase to contact me regarding this request.</span></label>
             </div>
@@ -207,4 +342,44 @@ if (error) {
       <footer><div className="footerGrid"><div><strong>ExpatEase</strong><p>Your trusted local assistant in Ecuador.</p></div><div><strong>Contact</strong><a href="https://wa.me/593996021267" target="_blank" rel="noreferrer">WhatsApp Business: 0996021267</a><span>Cuenca, Ecuador</span></div><div><strong>Important</strong><p>ExpatEase coordinates assistance and independent local providers. Final prices are confirmed after service.</p></div></div><div className="footerBottom">© {year} ExpatEase. All rights reserved.</div></footer>
     </>
   );
+}
+function timeToMinutes(time) {
+  if (!time) return 0;
+
+  const match = String(time).match(
+    /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i
+  );
+
+  if (!match) return 0;
+
+  let hour = Number(match[1]);
+  const minutes = Number(match[2] || 0);
+  const period = match[3].toUpperCase();
+
+  if (period === "AM" && hour === 12) {
+    hour = 0;
+  }
+
+  if (period === "PM" && hour !== 12) {
+    hour += 12;
+  }
+
+  return hour * 60 + minutes;
+}
+
+function minutesToTime(totalMinutes) {
+  let hour = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  const period = hour >= 12 ? "PM" : "AM";
+
+  let displayHour = hour % 12;
+
+  if (displayHour === 0) {
+    displayHour = 12;
+  }
+
+  return `${displayHour}:${String(
+    minutes
+  ).padStart(2, "0")} ${period}`;
 }
