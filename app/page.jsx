@@ -326,7 +326,7 @@ if (error) {
         value={time}
         disabled={isOccupied}
       >
-        {isOccupied ? `${time} — Unavailable` : time}
+        {isOccupied ? `${time} — Already occupied` : time}
       </option>
     );
   })}</select><small>{selectedDay === 6 ? "Saturday hours: 8:00 AM–8:00 PM" : "Monday–Friday hours: 8:00 AM–5:00 PM"}</small></label>
