@@ -210,13 +210,16 @@ const times = selectedDay === 6
     const uniqueCode = crypto.randomUUID().split("-")[0].toUpperCase();
 const reference = `EX-${new Date().getFullYear()}-${uniqueCode}`;
     const submitted = new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "short" }).format(new Date());
+    const countryCode = String(form.get("countryCode") || "").trim();
+    const phone = String(form.get("phone") || "").trim();
+    const whatsappNumber = `${countryCode} ${phone}`.trim();
     const { error } = await supabase
   .from("requests")
   .insert([
     {
       reference: reference,
       full_name: String(form.get("name") || ""),
-      whatsapp: String(form.get("phone") || ""),
+      whatsapp: whatsappNumber,
       email: String(form.get("email") || ""),
       location: String(form.get("location") || ""),
       service: String(form.get("service") || ""),
@@ -243,7 +246,7 @@ if (error) {
       `*Submitted:* ${submitted}`,
       "",
       `*Name:* ${form.get("name")}`,
-      `*WhatsApp:* ${form.get("phone")}`,
+      `*WhatsApp:* ${whatsappNumber}`,
       `*Email:* ${form.get("email") || "Not provided"}`,
       `*Location:* ${form.get("location")}`,
       `*Service:* ${form.get("service")}`,
@@ -301,18 +304,32 @@ if (error) {
             <div className="formGrid">
               <label><span>Full name</span><input name="name" required autoComplete="name" placeholder="John Smith" /></label>
               <label>
-  <span>WhatsApp number</span>
-  <input
-    name="phone"
-    type="tel"
-    required
-    autoComplete="tel"
-    placeholder="+1 555 000 0000"
-  />
-  <small>
-    Include your country code (e.g. +593 Ecuador, +1 USA/Canada, +44 UK).
-  </small>
-</label>
+                <span>WhatsApp number</span>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <span>(</span>
+                  <input
+                    name="countryCode"
+                    type="tel"
+                    inputMode="tel"
+                    required
+                    placeholder="+1"
+                    aria-label="Country code"
+                    style={{ width: "78px", textAlign: "center", flex: "0 0 78px" }}
+                  />
+                  <span>)</span>
+                  <input
+                    name="phone"
+                    type="tel"
+                    inputMode="tel"
+                    required
+                    autoComplete="tel"
+                    placeholder="555 000 0000"
+                    aria-label="WhatsApp phone number"
+                    style={{ flex: 1, minWidth: 0 }}
+                  />
+                </div>
+                <small>Enter your country code in parentheses, then your WhatsApp number.</small>
+              </label>
               <label><span>Email</span><input name="email" type="email" autoComplete="email" placeholder="john@email.com" /></label>
               <label><span>Location</span><input name="location" required placeholder="Cuenca, El Centro" /></label>
               <label><span>Service</span><select name="service" required value={selectedService} onChange={e => setSelectedService(e.target.value)}><option value="">Choose a service</option>{SERVICE_OPTIONS.map(option => <option key={option}>{option}</option>)}</select></label>
