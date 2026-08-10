@@ -207,9 +207,8 @@ const times = selectedDay === 6
     if (!selected) { setStatus("Please choose a preferred date."); return; }
     if (new Date(`${selected}T12:00:00`).getDay() === 0) { setStatus("We are closed on Sundays. Please choose Monday through Saturday."); return; }
 
-    const sequence = Number(localStorage.getItem("expatease-reference") || "0") + 1;
-    localStorage.setItem("expatease-reference", String(sequence));
-    const reference = `EX-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`;
+    const uniqueCode = crypto.randomUUID().split("-")[0].toUpperCase();
+const reference = `EX-${new Date().getFullYear()}-${uniqueCode}`;
     const submitted = new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "short" }).format(new Date());
     const { error } = await supabase
   .from("requests")
