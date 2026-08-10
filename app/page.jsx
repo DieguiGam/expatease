@@ -300,7 +300,19 @@ if (error) {
           <form className="requestForm" onSubmit={submit}>
             <div className="formGrid">
               <label><span>Full name</span><input name="name" required autoComplete="name" placeholder="John Smith" /></label>
-              <label><span>WhatsApp number</span><input name="phone" required autoComplete="tel" placeholder="+1 555 000 0000" /></label>
+              <label>
+  <span>WhatsApp number</span>
+  <input
+    name="phone"
+    type="tel"
+    required
+    autoComplete="tel"
+    placeholder="+1 555 000 0000"
+  />
+  <small>
+    Include your country code (e.g. +593 Ecuador, +1 USA/Canada, +44 UK).
+  </small>
+</label>
               <label><span>Email</span><input name="email" type="email" autoComplete="email" placeholder="john@email.com" /></label>
               <label><span>Location</span><input name="location" required placeholder="Cuenca, El Centro" /></label>
               <label><span>Service</span><select name="service" required value={selectedService} onChange={e => setSelectedService(e.target.value)}><option value="">Choose a service</option>{SERVICE_OPTIONS.map(option => <option key={option}>{option}</option>)}</select></label>
